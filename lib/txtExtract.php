@@ -68,35 +68,20 @@ class txtExtract {
 		/***
 		* Start and End of document bound positions...
 		*/
-		$this->orderedBounds[0] = $this->;
+		$this->orderedBounds[0] = $this->STARTBOUND;
 		$e = mb_strlen($this->txtDoc);
-		$this->orderedBounds[$e] = ;		
+		$this->orderedBounds[$e] = $this->ENDBOUND;		
 	}
 
-	public function debug(){
-//		print_r($this->txtDoc);
-//		print_r($this->txtBounds);
-		print_r($this->orderedBounds);
-		print_r($this->output);
-	}
-
-	public function extractDataNOK($withBound=false){		
-		$k = array_keys($this->orderedBounds);
-		$v = array_values($this->orderedBounds);
-		$s = sizeOf($k);
-		for($i=0;$i<$s-1;$i++){
-			$kB1 = array_shift($k);
-			$vB1 = array_shift($v);
-			if( $kB1 == "__START__:" ){$vB1 = "";}
-			list($kB2) = array_slice($k, 0, 1, false);
-			list($vB2) = array_slice($v, 0, 1, false);
-			if($withBound){
-				echo "--extract substr(txtDoc, $kB1, $kB2 - 1 ):".PHP_EOL;
-				echo mb_substr($this->txtDoc, $kB1, $kB2-1).PHP_EOL;
-				echo "....".PHP_EOL;
+	public function DEBUG($keyword=null, $what=null){
+		if ($what==null){
+				print_r($this->debugOut);
+				return true;
+		}else{
+			if ($keyword==null){
+				$this->debugOut[]=$what;
 			}else{
-				// echo "----extract substr(txtDoc, $kB1 +".mb_strlen($vB1)." $kB2 -1".PHP_EOL;
-				$this->output[] = mb_substr($this->txtDoc, $kB1 + mb_strlen($vB1), $kB2-1);
+				$this->debugOut[$keyword][]=$what;				
 			}
 		}
 	}
@@ -125,10 +110,12 @@ class txtExtract {
 		$k = array_keys($this->orderedBounds);
 		$v = array_values($this->orderedBounds);
 		$S = sizeOf($v);
-		for ($i=0;$i<S-1;$i++){
-			echo $v[$i]. "->".$v[$i+1].PHP_EOL;
+		for ($i=0;$i<$S-1;$i++){
+			$this->DEBUG('betweens', $v[$i]. "->".$v[$i+1]);
+			$o[] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
 		}
-	}
-	
+		$this->DEBUG('output',$o);
+		$this->DEBUG();
 		
+	}
 } // end of class 
