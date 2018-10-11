@@ -7,7 +7,8 @@
 		$doc->addStartEndBounds();
 		$doc->sortBoundsLocs();
 //		$doc->extractData(false, "FIRST");
-		print_r($doc->extractData(true, "BOTH"));
-//		$doc->extractData(false, "NONE");
-		
+//		print_r($doc->extractData(true, "BOTH"));
+		$doc->setOutputKey("both");
+		$doc->setShowStartEndBounds(true);
+		print_r($doc->extractData());		
 exit;

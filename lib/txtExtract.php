@@ -8,8 +8,8 @@ class txtExtract {
 	private $STARTBOUND = "__START__:";
 	private $ENDBOUND = ":__END__";
 
-	private $inside = true;
-	private $keyword = "BOTH";	
+	private $showStartEndBounds = false;
+	private $outputKey = "BOTH";	
 		
 	public function __construct($doc = null, $bounds = array())
 	{
@@ -115,31 +115,49 @@ class txtExtract {
 		return $o;
 	}
 
+	public function setOutputKey($ok){
+		$ook = strtoupper(trim($ok));
+		switch($ook){
+			case "BOTH":
+			case "NONE":
+			case "LEFTBOUND":
+			case "RIGHTBOUND":
+				$this->outputKey=$ook;
+				break;
+			default:
+				$this->outputKey="BOTH";
+				break;
+		}
+	}
+
+	public function setShowStartEndBounds($show=false){
+		$this->showStartEndBounds = ($show)?true:false;
+	}
+	
 	public function extractData(){
 		$k = array_keys($this->orderedBounds);
 		$v = array_values($this->orderedBounds);
 		$S = sizeOf($v);
-		if ( $this->inside ===  true){
-			$ST = 1; $EN = 2;
-		}else{
+		if ( $this->showStartEndBounds ===  true){
 			$ST = 0; $EN = 1;
+		}else{
+			$ST = 1; $EN = 2;
 		}
 		for ($i=$ST;$i<$S-$EN;$i++){
 			$B1 = $v[$i];
 			$B2 = $v[$i+1];
 			$this->DEBUG('betweens', $B1. "->".$B2);
-			switch(strtoupper(trim($this->keyword))){
-				case "FIRST":
+			switch($this->outputKey){
+				case "LEFTBOUND":
 					$INDEX = mb_substr($B1,0,120);
 					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
 					break;
-				case "LAST":
+				case "RIGHTBOUND":
 					$INDEX = mb_substr($B2,0,120);
 					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
 					break;
 				case "BOTH":
 					$INDEX = mb_substr($B1,0,120)."->".mb_substr($B2,0,120);
-					echo $INDEX.PHP_EOL;
 					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
 					break;
 				default:
