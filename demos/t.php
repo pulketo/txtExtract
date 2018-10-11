@@ -6,6 +6,8 @@
 	$doc->chkBoundsLocs();
 		$doc->addStartEndBounds();
 		$doc->sortBoundsLocs();
-		$doc->extractData(true);
-	$doc->debug();
+//		$doc->extractData(false, "FIRST");
+		print_r($doc->extractData(true, "BOTH"));
+//		$doc->extractData(false, "NONE");
+		
 exit;

@@ -7,6 +7,9 @@ class txtExtract {
 	private $output = array();
 	private $STARTBOUND = "__START__:";
 	private $ENDBOUND = ":__END__";
+
+	private $inside = true;
+	private $keyword = "BOTH";	
 		
 	public function __construct($doc = null, $bounds = array())
 	{
@@ -87,22 +90,28 @@ class txtExtract {
 	}
 
 	private function extractBetween($haystack, $bound1, $bound2){
+		// start to endbound
 		if ( ($bound1 == $this->STARTBOUND) && ($bound2 == $this->ENDBOUND)){
+			$this->DEBUG('extractBetween', "start to end");
 			return $haystack;
 		}
-		
+		// start to bound		
 		if ($bound1 == $this->STARTBOUND){
 			list($o) = explode($bound2, $haystack);
+			$this->DEBUG('extractBetween', "Start to Bound ($o)");
 			return $o;		
 		}
-		
+		// bound to end		
 		if ($bound2 == $this->ENDBOUND){
 			list($nop, $o) = explode($bound1, $haystack);
+			$this->DEBUG('extractBetween', "Bound to End ($o)");
 			return $o;		
 		}
-
-		list($o) = explode($bound2, $haystack);
-		list($nop, $o) = explode($bound1, $haystack);
+		// bound to bound
+		$c1 = explode($bound1, $haystack);
+		$c2 = explode($bound2, $c1[1]);
+		$o = trim($c2[0]);
+		$this->DEBUG('extractBetween', "Bound to Bound ($o)");
 		return $o;
 	}
 
@@ -110,12 +119,35 @@ class txtExtract {
 		$k = array_keys($this->orderedBounds);
 		$v = array_values($this->orderedBounds);
 		$S = sizeOf($v);
-		for ($i=0;$i<$S-1;$i++){
-			$this->DEBUG('betweens', $v[$i]. "->".$v[$i+1]);
-			$o[] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
+		if ( $this->inside ===  true){
+			$ST = 1; $EN = 2;
+		}else{
+			$ST = 0; $EN = 1;
 		}
-		$this->DEBUG('output',$o);
-		$this->DEBUG();
-		
+		for ($i=$ST;$i<$S-$EN;$i++){
+			$B1 = $v[$i];
+			$B2 = $v[$i+1];
+			$this->DEBUG('betweens', $B1. "->".$B2);
+			switch(strtoupper(trim($this->keyword))){
+				case "FIRST":
+					$INDEX = mb_substr($B1,0,120);
+					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
+					break;
+				case "LAST":
+					$INDEX = mb_substr($B2,0,120);
+					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
+					break;
+				case "BOTH":
+					$INDEX = mb_substr($B1,0,120)."->".mb_substr($B2,0,120);
+					echo $INDEX.PHP_EOL;
+					$o[$INDEX] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
+					break;
+				default:
+					$o[] = $this->extractBetween($this->txtDoc, $v[$i], $v[$i+1]);
+					break;
+			}
+		}
+		return $o;
+		// $this->DEBUG('output',$o);
 	}
 } // end of class 
